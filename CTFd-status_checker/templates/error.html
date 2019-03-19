@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+{% endblock %}
+
+{% block content %}
+<br><br>
+<div class="container">
+    <div class="alert alert-danger">
+        {{ error | safe  }}
+    </div>
+</div>
+{% endblock %}

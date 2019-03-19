@@ -1,0 +1,1 @@
+{"timeout": 120, "flag_regex": "flag_[a-zA-Z0-9]{40}_", "workers": 15, "delay_in_seconds": 1800, "retries": 3, "up_to_date_interval_in_seconds": 120}

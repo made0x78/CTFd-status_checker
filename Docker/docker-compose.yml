@@ -1,0 +1,70 @@
+version: '3'
+
+services:
+  ctfd:
+    build: ./CTFd/ # change path
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - UPLOAD_FOLDER=/var/uploads
+      - DATABASE_URL=mysql+pymysql://root:ctfd@db/ctfd
+      - REDIS_URL=redis://cache:6379
+      - WORKERS=1
+      - LOG_FOLDER=/var/log/CTFd
+      - ACCESS_LOG=-
+      - ERROR_LOG=-
+    volumes:
+      - ./CTFd/.data/CTFd/logs:/var/log/CTFd # change path
+      - ./CTFd/.data/CTFd/uploads:/var/uploads # change path
+      - ./CTFd/:/opt/CTFd:ro # change path
+    depends_on:
+      - db
+    networks:
+        default:
+        internal:
+          ipv4_address: 192.168.0.2 # avoid random
+
+  db:
+    image: mariadb:10.4
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=ctfd
+      - MYSQL_USER=ctfd
+      - MYSQL_PASSWORD=ctfd
+    volumes:
+      - .data/mysql:/var/lib/mysql
+    networks:
+        internal:
+          ipv4_address: 192.168.0.3 # avoid random
+    # This command is required to set important mariadb defaults
+    command: [mysqld, --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --wait_timeout=28800, --log-warnings=0]
+
+  cache:
+    image: redis:4
+    restart: always
+    volumes:
+    - ./CTFd/.data/redis:/data # change path
+    networks:
+        internal:
+          ipv4_address: 192.168.0.5 # avoid random
+
+  #
+  # new!
+  #
+  status_checker:
+    build: status_checker
+    dns: 8.8.8.8
+    networks:
+        default: # for outbound traffic
+        internal:
+          ipv4_address: 192.168.0.4 # we need a predictable IP address to bind the server only to the internal interface
+        
+networks:
+  default:
+  internal:
+    internal: true
+    ipam: 
+        driver: default
+        config:
+          - subnet: 192.168.0.0/16

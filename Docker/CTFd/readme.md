@@ -1,0 +1,1 @@
+This could be a clean `git clone https://github.com/CTFd/CTFd.git`

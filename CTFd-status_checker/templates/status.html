@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+{% endblock %}
+
+{% block content %}
+<br/>
+<div class="container">
+    {% if msg != "" %}
+    <div class="container">
+        <div class="alert alert-info">
+          {{ msg | safe  }}
+        </div>
+    </div>
+    {% endif %}
+
+    {% for category in data %}
+    <div class="container">
+        <h2 class="text-center">{{category}}</h2><br/>
+        <table class="table table-bordered">
+        <thead>
+            <tr>
+            <th class="text-center" style="width: 20%">Name</th>
+            <th class="text-center" style="width: 20%">Last Checked</th>
+            <th class="text-center" style="width: 20%"></th>
+            {% if admin == True %}
+            <th class="text-center" style="width: 50%">Result</th>
+            {% endif %}
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for challenge_name, challenge in data[category].items() %}
+            <tr class="bg-{% if challenge.status == 'success' %}success{% else %}danger{% endif %}">
+                <td class="align-middle text-center">{{challenge_name}}</td>
+                <td class="align-middle text-center">{{challenge.timestamp}}</td>
+                <td class="align-middle text-center">
+                    {% if challenge.action == "queued" %}
+                    Processing
+                    {% elif challenge.action == "refresh" %}
+                    <form method="POST">
+                        <input type="hidden" name="challenge" value="{{challenge_name}}">
+                        <input type="hidden" name="category" value="{{category}}">
+                        <input type="hidden" value="{{ nonce }}" name="nonce" id="nonce">
+                        <input class="btn btn-primary-outline" type="submit" value="Refresh">
+                    </form>
+                    {% else %}
+                    For {{challenge.action}} seconds up to date
+                    {% endif %}
+                </td>
+                {% if admin == True %}
+                <td class="align-middle text-center">{{challenge.msg}}</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+        <br/>
+    </div>
+    {% endfor %}
+</div>
+<br/><br/><br/>
+{% endblock %}
