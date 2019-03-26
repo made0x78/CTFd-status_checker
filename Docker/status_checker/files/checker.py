@@ -55,7 +55,7 @@ def get_checker_dict():
     return checker_dict
 
 
-def execute_checker(checker_location, count, temp_config):
+def execute_checker(checker_location, temp_config):
     checker_file = "./" + os.path.basename(checker_location)
     path = os.path.dirname(checker_location)
     
@@ -63,7 +63,7 @@ def execute_checker(checker_location, count, temp_config):
         st = os.stat(checker_location)
         os.chmod(checker_location, st.st_mode | stat.S_IEXEC)
         try:
-            result = subprocess.check_output(checker_file, cwd=path, stderr=subprocess.STDOUT, timeout=temp_config["timeout"]*count) # if retry, increase timeout
+            result = subprocess.check_output(checker_file, cwd=path, stderr=subprocess.STDOUT, timeout=temp_config["timeout"])
             return (True, result)
         except subprocess.TimeoutExpired:
             return (False, "Timeout")
@@ -122,7 +122,7 @@ class TaskQueue(queue.Queue):
             count = 1
             while count <= temp_config["retries"]:
                 # Execute Script with timeout
-                result = execute_checker(checker_location, count, temp_config)
+                result = execute_checker(checker_location, temp_config)
                 # Check if flag is in stdout
                 if result[0] and check_flag(result[1]):
                     checker_dict[checker_category][challenge_name]["status"] = "success"
